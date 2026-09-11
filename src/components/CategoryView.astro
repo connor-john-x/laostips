@@ -1,0 +1,58 @@
+---
+import type { Category } from "../consts";
+import type { Lang } from "../i18n/config";
+import { useTranslations } from "../i18n/utils";
+import { getPostsByLangCategory, toCard } from "../lib/posts";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "./ArticleCard.astro";
+import AdSlot from "./AdSlot.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+
+interface Props {
+	lang: Lang;
+	category: Category;
+}
+const { lang, category } = Astro.props;
+const t = useTranslations(lang);
+const posts = (await getPostsByLangCategory(lang, category)).map(toCard);
+const name = t(`category.${category}.name`);
+---
+
+<BaseLayout lang={lang} title={`${name} — ${t("site.name")}`} description={t(`category.${category}.desc`)}>
+	<section class="section">
+		<div class="container">
+			<Breadcrumbs {lang} items={[{ label: name }]} />
+			<div class="section-head">
+				<h1>{name}</h1>
+				<p>{t(`category.${category}.desc`)}</p>
+			</div>
+
+			{
+				posts.length > 0 ? (
+					<>
+						<div class="grid grid-3">
+							{posts.slice(0, 3).map((post) => (
+								<ArticleCard lang={lang} {...post} />
+							))}
+						</div>
+						{posts.length > 3 && (
+							<>
+								<AdSlot {lang} variant="banner" />
+								<div class="grid grid-3">
+									{posts.slice(3).map((post) => (
+										<ArticleCard lang={lang} {...post} />
+									))}
+								</div>
+							</>
+						)}
+					</>
+				) : (
+					<div class="empty">
+						<h3>{t("common.noPosts")}</h3>
+						<p>{t("common.noPostsDesc")}</p>
+					</div>
+				)
+			}
+		</div>
+	</section>
+</BaseLayout>

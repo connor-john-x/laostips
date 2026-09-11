@@ -1,0 +1,60 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Newsletter from "../components/Newsletter.astro";
+import { DISABLE_AUTO_TRANSLATE } from "../consts";
+import type { Lang } from "../i18n/config";
+import { languages } from "../i18n/config";
+
+interface Props {
+	lang: Lang;
+	title: string;
+	description: string;
+	image?: string;
+	type?: "website" | "article";
+	publishedTime?: string;
+	modifiedTime?: string;
+	noindex?: boolean;
+	structuredData?: Record<string, unknown>;
+	showNewsletter?: boolean;
+}
+
+const {
+	lang,
+	title,
+	description,
+	image,
+	type = "website",
+	publishedTime,
+	modifiedTime,
+	noindex = false,
+	structuredData,
+	showNewsletter = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang={languages[lang].htmlLang} translate={DISABLE_AUTO_TRANSLATE ? "no" : undefined}>
+	<head>
+		<BaseHead
+			{title}
+			{description}
+			{lang}
+			{image}
+			{type}
+			{publishedTime}
+			{modifiedTime}
+			{noindex}
+			{structuredData}
+		/>
+	</head>
+	<body>
+		<Header {lang} />
+		<main>
+			<slot />
+		</main>
+		{showNewsletter && <Newsletter {lang} />}
+		<Footer {lang} />
+	</body>
+</html>

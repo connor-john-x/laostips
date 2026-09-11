@@ -1,0 +1,243 @@
+---
+import type { Category } from "../consts";
+import { SITE_NAME, SITE_URL } from "../consts";
+import type { Lang } from "../i18n/config";
+import { languages } from "../i18n/config";
+import { useTranslations, localizePath, formatDate } from "../i18n/utils";
+import BaseLayout from "./BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import AdSlot from "../components/AdSlot.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+
+interface RelatedPost {
+	slug: string;
+	title: string;
+	description: string;
+	category: Category;
+	pubDate: Date;
+	heroImage?: string;
+}
+
+interface Props {
+	lang: Lang;
+	slug: string;
+	title: string;
+	description: string;
+	pubDate: Date;
+	updatedDate?: Date;
+	heroImage?: string;
+	category: Category;
+	tags?: string[];
+	author?: string;
+	readingMinutes?: number;
+	related?: RelatedPost[];
+}
+
+const {
+	lang,
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	category,
+	tags = [],
+	author = SITE_NAME,
+	readingMinutes,
+	related = [],
+} = Astro.props;
+const t = useTranslations(lang);
+
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const shareText = encodeURIComponent(title);
+const shareUrl = encodeURIComponent(canonical);
+const shareLinks = [
+	{ label: "X", href: `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}` },
+	{ label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}` },
+	{ label: "Telegram", href: `https://t.me/share/url?url=${shareUrl}&text=${shareText}` },
+	{ label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}` },
+];
+
+const structuredData = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	headline: title,
+	description,
+	image: heroImage ? new URL(heroImage, SITE_URL).href : undefined,
+	datePublished: pubDate.toISOString(),
+	dateModified: (updatedDate ?? pubDate).toISOString(),
+	inLanguage: languages[lang].htmlLang,
+	author: { "@type": "Organization", name: author },
+	publisher: { "@type": "Organization", name: SITE_NAME },
+	mainEntityOfPage: canonical,
+};
+---
+
+<BaseLayout
+	lang={lang}
+	title={title}
+	description={description}
+	image={heroImage}
+	type="article"
+	publishedTime={pubDate.toISOString()}
+	modifiedTime={(updatedDate ?? pubDate).toISOString()}
+	{structuredData}
+	showNewsletter={false}
+>
+	<article class="article">
+		<header class="hero">
+			<div class="container">
+				<Breadcrumbs
+					{lang}
+					items={[
+						{ label: t(`category.${category}.name`), href: localizePath(`/${category}/`, lang) },
+						{ label: title },
+					]}
+				/>
+				<span class="badge">{t(`category.${category}.name`)}</span>
+				<h1>{title}</h1>
+				<p class="lead">{description}</p>
+				<div class="meta">
+					<span>{t("common.author")}: {author}</span>
+					<span>&middot;</span>
+					<time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
+					{
+						readingMinutes && (
+							<>
+								<span>&middot;</span>
+								<span>
+									{readingMinutes} {t("common.minutesRead")}
+								</span>
+							</>
+						)
+					}
+					{
+						updatedDate && (
+							<>
+								<span>&middot;</span>
+								<span>
+									{t("common.updated")} {formatDate(updatedDate, lang)}
+								</span>
+							</>
+						)
+					}
+				</div>
+			</div>
+		</header>
+
+		{
+			heroImage && (
+				<div class="container hero-image">
+					<img src={heroImage} alt={title} width={1120} height={630} />
+				</div>
+			)
+		}
+
+		<div class="container body">
+			<div class="prose">
+				<slot />
+				<AdSlot {lang} variant="in-article" />
+				{
+					tags.length > 0 && (
+						<div class="tags">
+							<span>{t("common.tags")}:</span>
+							{tags.map((tag) => (
+								<span class="tag">{tag}</span>
+							))}
+						</div>
+					)
+				}
+				<div class="share">
+					<span>{t("common.share")}:</span>
+					{shareLinks.map((link) => (
+						<a href={link.href} target="_blank" rel="noopener">
+							{link.label}
+						</a>
+					))}
+				</div>
+			</div>
+		</div>
+
+		{
+			related.length > 0 && (
+				<section class="container related">
+					<div class="section-head">
+						<h2>{t("common.relatedPosts")}</h2>
+					</div>
+					<div class="grid grid-3">
+						{related.map((post) => (
+							<ArticleCard lang={lang} {...post} />
+						))}
+					</div>
+				</section>
+			)
+		}
+	</article>
+</BaseLayout>
+
+<style>
+	.hero {
+		padding: 2.5rem 0 1rem;
+	}
+	.hero h1 {
+		font-size: 2.6rem;
+		margin: 0.5rem 0 0.75rem;
+	}
+	.lead {
+		font-size: 1.15rem;
+		color: rgb(var(--gray));
+		max-width: 70ch;
+	}
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		color: rgb(var(--gray));
+		font-size: 0.9rem;
+	}
+	.hero-image {
+		margin-top: 1rem;
+	}
+	.hero-image img {
+		width: 100%;
+		max-height: 480px;
+		object-fit: cover;
+		border-radius: var(--radius);
+	}
+	.body {
+		padding-top: 2rem;
+	}
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 2rem 0 1rem;
+		font-size: 0.9rem;
+		color: rgb(var(--gray));
+	}
+	.tag {
+		padding: 0.2em 0.7em;
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+	}
+	.share {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border);
+		font-size: 0.9rem;
+		color: rgb(var(--gray));
+	}
+	.related {
+		padding-top: 3rem;
+	}
+	@media (max-width: 640px) {
+		.hero h1 {
+			font-size: 2rem;
+		}
+	}
+</style>

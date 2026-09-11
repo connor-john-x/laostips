@@ -1,0 +1,104 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import { locales, defaultLang } from "../i18n/config";
+import { localizePath } from "../i18n/utils";
+import { DISABLE_AUTO_TRANSLATE, SITE_NAME } from "../consts";
+
+const messages = {
+	zh: { title: "页面不存在", body: "抱歉，你访问的页面不存在或已被移动。", home: "返回首页" },
+	en: {
+		title: "Page not found",
+		body: "Sorry, the page you are looking for doesn't exist or has been moved.",
+		home: "Back home",
+	},
+	lo: {
+		title: "ບໍ່ພົບໜ້າ",
+		body: "ຂໍອະໄພ, ໜ້າທີ່ທ່ານຊອກຫາບໍ່ມີ ຫຼື ຖືກຍ້າຍໄປແລ້ວ.",
+		home: "ກັບໜ້າຫຼັກ",
+	},
+	th: {
+		title: "ไม่พบหน้า",
+		body: "ขออภัย ไม่พบหน้าที่คุณต้องการ หรือถูกย้ายไปแล้ว",
+		home: "กลับหน้าแรก",
+	},
+} as const;
+---
+
+<!doctype html>
+<html lang="zh-CN" translate={DISABLE_AUTO_TRANSLATE ? "no" : undefined}>
+	<head>
+		<BaseHead
+			title={`404 — ${SITE_NAME}`}
+			description="Page not found"
+			lang={defaultLang}
+			noindex={true}
+		/>
+	</head>
+	<body>
+		<main class="notfound">
+			<p class="code-404">404</p>
+			{
+				locales.map((loc) => (
+					<div class="msg" data-lang={loc} hidden>
+						<h1>{messages[loc].title}</h1>
+						<p>{messages[loc].body}</p>
+						<a class="btn btn-primary" href={localizePath("/", loc)}>
+							{messages[loc].home}
+						</a>
+					</div>
+				))
+			}
+			<div class="links">
+				{locales.map((loc) => <a class="btn btn-ghost" href={localizePath("/", loc)}>{loc.toUpperCase()}</a>)}
+			</div>
+		</main>
+
+		<script is:inline>
+			(function () {
+				var seg = location.pathname.split("/")[1];
+				var valid = ["zh", "en", "lo", "th"];
+				var lang = valid.indexOf(seg) !== -1 ? seg : "en";
+				document.documentElement.lang = lang;
+				var blocks = document.querySelectorAll(".msg");
+				for (var i = 0; i < blocks.length; i++) {
+					blocks[i].hidden = blocks[i].getAttribute("data-lang") !== lang;
+				}
+			})();
+		</script>
+	</body>
+</html>
+
+<style>
+	.notfound {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		text-align: center;
+		padding: 2rem;
+	}
+	.code-404 {
+		font-size: 5rem;
+		font-weight: 700;
+		margin: 0;
+		color: var(--accent);
+		line-height: 1;
+	}
+	.msg h1 {
+		margin-bottom: 0.5rem;
+	}
+	.msg p {
+		color: rgb(var(--gray));
+		max-width: 44ch;
+	}
+	.msg .btn {
+		margin-top: 0.75rem;
+	}
+	.links {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 2rem;
+	}
+</style>

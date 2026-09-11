@@ -7,8 +7,21 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://example.com",
-	integrations: [mdx(), sitemap()],
+	site: "https://laostips.com",
+	integrations: [
+		mdx(),
+		sitemap({
+			i18n: {
+				defaultLocale: "zh",
+				locales: {
+					zh: "zh-CN",
+					en: "en",
+					lo: "lo-LA",
+					th: "th-TH",
+				},
+			},
+		}),
+	],
 	adapter: cloudflare({
 		platformProxy: {
 			enabled: true,

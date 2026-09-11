@@ -1,0 +1,11 @@
+---
+import CategoryView from "../../../components/CategoryView.astro";
+import { locales, type Lang } from "../../../i18n/config";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+---
+
+<CategoryView {lang} category="living" />

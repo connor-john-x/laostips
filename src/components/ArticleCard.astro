@@ -1,0 +1,38 @@
+---
+import type { Category } from "../consts";
+import type { Lang } from "../i18n/config";
+import { useTranslations, localizePath, formatDate } from "../i18n/utils";
+
+interface Props {
+	lang: Lang;
+	slug: string;
+	title: string;
+	description: string;
+	category: Category;
+	pubDate: Date;
+	heroImage?: string;
+}
+const { lang, slug, title, description, category, pubDate, heroImage } = Astro.props;
+const t = useTranslations(lang);
+const href = localizePath(`/blog/${slug}/`, lang);
+---
+
+<article class="card">
+	<a href={href} class="cover-link" aria-hidden="true" tabindex="-1">
+		{
+			heroImage ? (
+				<img class="card-cover" src={heroImage} alt="" width={720} height={405} loading="lazy" />
+			) : (
+				<div class="card-cover placeholder" />
+			)
+		}
+	</a>
+	<div class="card-body">
+		<span class="badge">{t(`category.${category}.name`)}</span>
+		<h3><a href={href}>{title}</a></h3>
+		<p class="card-desc">{description}</p>
+		<div class="card-meta">
+			<time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
+		</div>
+	</div>
+</article>

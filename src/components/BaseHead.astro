@@ -1,22 +1,51 @@
 ---
-// Import the global.css file here so that it is included on
-// all pages through the use of the <BaseHead /> component.
-import '../styles/global.css';
+import "../styles/global.css";
+import { ADSENSE_CLIENT, CF_ANALYTICS_TOKEN, DISABLE_AUTO_TRANSLATE, SITE_NAME, SITE_URL } from "../consts";
+import { defaultLang, languages, type Lang } from "../i18n/config";
+import { getAlternates, stripLocale } from "../i18n/utils";
 
 interface Props {
 	title: string;
 	description: string;
+	lang: Lang;
 	image?: string;
+	type?: "website" | "article";
+	publishedTime?: string;
+	modifiedTime?: string;
+	noindex?: boolean;
+	structuredData?: Record<string, unknown>;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const {
+	title,
+	description,
+	lang,
+	image = "/blog-placeholder-1.jpg",
+	type = "website",
+	publishedTime,
+	modifiedTime,
+	noindex = false,
+	structuredData,
+} = Astro.props;
 
-const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
+const imageURL = new URL(image, Astro.site ?? SITE_URL);
+const pathWithoutLang = stripLocale(Astro.url.pathname);
+const alternates = getAlternates(pathWithoutLang);
+
+const websiteLd = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: SITE_NAME,
+	url: SITE_URL,
+	inLanguage: languages[lang].htmlLang,
+};
+const ld = structuredData ? [websiteLd, structuredData] : [websiteLd];
 ---
 
-<!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+{DISABLE_AUTO_TRANSLATE && <meta name="google" content="notranslate" />}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="generator" content={Astro.generator} />
 
@@ -24,24 +53,64 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
 <link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin />
 
-<!-- Canonical URL -->
+<!-- Canonical + hreflang -->
 <link rel="canonical" href={canonicalURL} />
+{
+	alternates.map((alt) => (
+		<link rel="alternate" hreflang={alt.htmlLang} href={new URL(alt.href, SITE_URL)} />
+	))
+}
+<link
+	rel="alternate"
+	hreflang="x-default"
+	href={new URL(alternates.find((a) => a.lang === defaultLang)?.href ?? "/", SITE_URL)}
+/>
 
-<!-- Primary Meta Tags -->
+<!-- Primary meta -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content={languages[lang].htmlLang.replace("-", "_")} />
+<meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image, Astro.url)} />
+<meta property="og:image" content={imageURL} />
+{publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
 
 <!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
-<meta property="twitter:title" content={title} />
-<meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image, Astro.url)} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
+
+<!-- Structured data -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify(ld)} />
+
+<!-- Monetization / analytics -->
+{
+	ADSENSE_CLIENT && (
+		<script
+			is:inline
+			async
+			src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+			crossorigin="anonymous"
+		/>
+	)
+}
+{
+	CF_ANALYTICS_TOKEN && (
+		<script
+			is:inline
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon={JSON.stringify({ token: CF_ANALYTICS_TOKEN })}
+		/>
+	)
+}

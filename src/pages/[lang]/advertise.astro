@@ -1,0 +1,148 @@
+---
+import { CONTACT_EMAIL, SITE_NAME } from "../../consts";
+import { locales, type Lang } from "../../i18n/config";
+import { useTranslations } from "../../i18n/utils";
+import type { UIKey } from "../../i18n/ui";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import AdSlot from "../../components/AdSlot.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const formats: { nameKey: UIKey; descKey: UIKey; price: string }[] = [
+	{ nameKey: "advertise.formatDisplay.name", descKey: "advertise.formatDisplay.desc", price: "$80 / month" },
+	{
+		nameKey: "advertise.formatSponsored.name",
+		descKey: "advertise.formatSponsored.desc",
+		price: "$150 / article",
+	},
+	{
+		nameKey: "advertise.formatNewsletter.name",
+		descKey: "advertise.formatNewsletter.desc",
+		price: "$120 / send",
+	},
+	{
+		nameKey: "advertise.formatAffiliate.name",
+		descKey: "advertise.formatAffiliate.desc",
+		price: "Revenue share",
+	},
+];
+---
+
+<BaseLayout lang={lang} title={`${t("advertise.title")} — ${SITE_NAME}`} description={t("advertise.description")}>
+	<section class="section">
+		<div class="container">
+			<Breadcrumbs {lang} items={[{ label: t("advertise.title") }]} />
+			<div class="section-head">
+				<h1>{t("advertise.title")}</h1>
+				<p class="lead">{t("advertise.intro")}</p>
+			</div>
+
+			<div class="audience">
+				<h2>{t("advertise.audienceTitle")}</h2>
+				<p>{t("advertise.audienceDesc")}</p>
+			</div>
+
+			<h2>{t("advertise.formatsTitle")}</h2>
+			<div class="grid grid-2">
+				{
+					formats.map((format) => (
+						<div class="format">
+							<div class="format-head">
+								<h3>{t(format.nameKey)}</h3>
+								<span class="price">{format.price}</span>
+							</div>
+							<p>{t(format.descKey)}</p>
+						</div>
+					))
+				}
+			</div>
+
+			<div class="callout">
+				<h2>{t("advertise.cta")}</h2>
+				<p>{t("advertise.contactPrompt")}</p>
+				<a class="btn btn-primary" href={`mailto:${CONTACT_EMAIL}?subject=Advertising on ${SITE_NAME}`}>
+					{CONTACT_EMAIL}
+				</a>
+			</div>
+
+			<AdSlot {lang} variant="banner" />
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.lead {
+		font-size: 1.15rem;
+		color: rgb(var(--gray));
+		max-width: 70ch;
+	}
+	.audience {
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 1.75rem;
+		margin-bottom: 2.5rem;
+	}
+	.audience h2 {
+		margin-top: 0;
+	}
+	.audience p {
+		margin: 0;
+		color: rgb(var(--gray-dark));
+	}
+	h2 {
+		margin-top: 2.5rem;
+	}
+	.format {
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 1.5rem;
+	}
+	.format-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 1rem;
+		margin-bottom: 0.5rem;
+	}
+	.format-head h3 {
+		margin: 0;
+		font-size: 1.15rem;
+	}
+	.price {
+		color: var(--accent);
+		font-weight: 700;
+		font-size: 0.9rem;
+		white-space: nowrap;
+	}
+	.format p {
+		margin: 0;
+		color: rgb(var(--gray));
+		font-size: 0.95rem;
+	}
+	.callout {
+		margin-top: 3rem;
+		background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+		color: #fff;
+		border-radius: var(--radius);
+		padding: 2.5rem;
+		text-align: center;
+	}
+	.callout h2 {
+		color: #fff;
+		margin-top: 0;
+	}
+	.callout p {
+		color: rgba(255, 255, 255, 0.88);
+		max-width: 60ch;
+		margin-inline: auto;
+	}
+	.callout .btn {
+		margin-top: 0.75rem;
+	}
+</style>

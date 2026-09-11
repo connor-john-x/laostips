@@ -1,0 +1,126 @@
+---
+import { getCollection } from "astro:content";
+import { languages, locales, type Lang } from "../i18n/config";
+import { localizePath, stripLocale, parseContentId } from "../i18n/utils";
+
+interface Props {
+	lang: Lang;
+}
+const { lang } = Astro.props;
+const pathWithoutLang = stripLocale(Astro.url.pathname);
+const current = languages[lang];
+
+// An article may not exist in every language. Build the set of existing
+// article URLs so we can fall back to the target language's blog index
+// instead of landing on a default-language 404.
+const posts = await getCollection("blog", (post) => !post.data.draft);
+const existingPaths = new Set(
+	posts.map((post) => {
+		const { lang: postLang, slug } = parseContentId(post.id);
+		return `/${postLang}/blog/${slug}/`;
+	}),
+);
+
+function targetFor(loc: Lang): string {
+	const direct = localizePath(pathWithoutLang, loc);
+	const isArticle = pathWithoutLang.startsWith("/blog/") && pathWithoutLang !== "/blog/";
+	if (isArticle && !existingPaths.has(direct)) {
+		return localizePath("/blog/", loc);
+	}
+	return direct;
+}
+---
+
+<details class="lang-picker">
+	<summary aria-label={`Language: ${current.native}`}>
+		<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
+			><path
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c2.5-2.2 3.8-5.3 3.8-9S14.5 5.2 12 3M12 21c-2.5-2.2-3.8-5.3-3.8-9S9.5 5.2 12 3M3.5 9h17M3.5 15h17"
+			></path></svg
+		>
+		<span>{current.native}</span>
+	</summary>
+	<ul>
+		{
+			locales.map((loc) => (
+				<li>
+					<a
+						href={targetFor(loc)}
+						onclick={`try{localStorage.setItem("laostips-lang","${loc}")}catch(e){}`}
+						class:list={{ active: loc === lang }}
+					>
+						<span>{languages[loc].native}</span>
+						<span class="code">{loc.toUpperCase()}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</details>
+
+<style>
+	.lang-picker {
+		position: relative;
+	}
+	summary {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35em;
+		padding: 0.5em 0.75em;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		cursor: pointer;
+		list-style: none;
+		font-size: 0.9rem;
+		font-weight: 700;
+		color: rgb(var(--gray-dark));
+		white-space: nowrap;
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	summary:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	ul {
+		position: absolute;
+		right: 0;
+		top: calc(100% + 0.5rem);
+		min-width: 180px;
+		background: #fff;
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		box-shadow: var(--box-shadow);
+		list-style: none;
+		margin: 0;
+		padding: 0.35rem;
+		z-index: 50;
+	}
+	li a {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.55em 0.7em;
+		border-radius: 8px;
+		color: rgb(var(--gray-dark));
+		font-size: 0.95rem;
+	}
+	li a:hover {
+		background: var(--bg-soft);
+		text-decoration: none;
+	}
+	li a.active {
+		background: var(--accent-soft);
+		color: var(--accent);
+		font-weight: 700;
+	}
+	.code {
+		color: rgb(var(--gray));
+		font-size: 0.75rem;
+	}
+</style>

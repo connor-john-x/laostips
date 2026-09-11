@@ -1,0 +1,159 @@
+---
+import { CONTACT_EMAIL, SITE_NAME } from "../../consts";
+import { locales, type Lang } from "../../i18n/config";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+
+const content: Record<Lang, { title: string; updated: string; sections: { h: string; p: string }[] }> = {
+	zh: {
+		title: "隐私政策",
+		updated: "最后更新：2026 年",
+		sections: [
+			{
+				h: "我们收集的信息",
+				p: "本站不要求注册。当你发送邮件或订阅通讯时，我们会收集你主动提供的邮箱与留言内容，仅用于回复与发送更新。",
+			},
+			{
+				h: "Cookie 与广告",
+				p: "本站可能使用 Google AdSense 等第三方广告服务，它们会使用 Cookie 根据你的浏览记录展示广告。你可以通过浏览器设置管理或关闭 Cookie。",
+			},
+			{
+				h: "网站分析",
+				p: "我们使用注重隐私的 Cloudflare Web Analytics 了解访问量，不追踪个人身份信息。",
+			},
+			{
+				h: "联盟链接",
+				p: "部分文章可能包含联盟推广链接（如酒店、机票、保险）。通过这些链接购买，我们可能获得少量佣金，价格对你不变。",
+			},
+			{
+				h: "第三方链接",
+				p: "本站包含指向外部网站的链接，我们不对其隐私做法负责，请查阅对应网站的政策。",
+			},
+			{
+				h: "联系我们",
+				p: `如对隐私有任何疑问，请联系 ${CONTACT_EMAIL}。`,
+			},
+		],
+	},
+	en: {
+		title: "Privacy Policy",
+		updated: "Last updated: 2026",
+		sections: [
+			{
+				h: "Information we collect",
+				p: "This site does not require registration. When you email us or subscribe to the newsletter, we collect the address and message you provide, used only to reply and send updates.",
+			},
+			{
+				h: "Cookies and advertising",
+				p: "We may use third-party ad services such as Google AdSense, which use cookies to show ads based on your browsing. You can manage or disable cookies in your browser settings.",
+			},
+			{
+				h: "Analytics",
+				p: "We use privacy-friendly Cloudflare Web Analytics to understand traffic without tracking personally identifiable information.",
+			},
+			{
+				h: "Affiliate links",
+				p: "Some articles may contain affiliate links (hotels, flights, insurance). If you buy through them we may earn a small commission at no extra cost to you.",
+			},
+			{
+				h: "Third-party links",
+				p: "This site links to external websites. We are not responsible for their privacy practices; please review their policies.",
+			},
+			{
+				h: "Contact",
+				p: `For any privacy questions, contact ${CONTACT_EMAIL}.`,
+			},
+		],
+	},
+	lo: {
+		title: "ນະໂຍບາຍຄວາມເປັນສ່ວນຕົວ",
+		updated: "ອັບເດດຫຼ້າສຸດ: 2026",
+		sections: [
+			{
+				h: "ຂໍ້ມູນທີ່ເຮົາເກັບ",
+				p: "ເວັບນີ້ບໍ່ຕ້ອງການລົງທະບຽນ. ເມື່ອທ່ານສົ່ງອີເມວ ຫຼື ສະໝັກຂ່າວ, ເຮົາເກັບອີເມວ ແລະ ຂໍ້ຄວາມທີ່ທ່ານໃຫ້ ເພື່ອຕອບກັບ ແລະ ສົ່ງຂ່າວເທົ່ານັ້ນ.",
+			},
+			{
+				h: "ຄຸກກີ້ ແລະ ໂຄສະນາ",
+				p: "ເຮົາອາດໃຊ້ບໍລິການໂຄສະນາພາຍນອກ ເຊັ່ນ Google AdSense ເຊິ່ງໃຊ້ຄຸກກີ້.",
+			},
+			{
+				h: "ການວິເຄາະ",
+				p: "ເຮົາໃຊ້ Cloudflare Web Analytics ທີ່ເຄົາລົບຄວາມເປັນສ່ວນຕົວ.",
+			},
+			{
+				h: "ລິ້ງຮ່ວມມື",
+				p: "ບາງບົດຄວາມອາດມີລິ້ງຮ່ວມມື; ເຮົາອາດໄດ້ຄ່າຄອມມິດຊັນເລັກນ້ອຍ.",
+			},
+			{
+				h: "ຕິດຕໍ່",
+				p: `ຕິດຕໍ່ ${CONTACT_EMAIL}.`,
+			},
+		],
+	},
+	th: {
+		title: "นโยบายความเป็นส่วนตัว",
+		updated: "อัปเดตล่าสุด: 2026",
+		sections: [
+			{
+				h: "ข้อมูลที่เราเก็บ",
+				p: "เว็บนี้ไม่ต้องลงทะเบียน เมื่อคุณส่งอีเมลหรือสมัครข่าว เราจะเก็บอีเมลและข้อความที่คุณให้ เพื่อตอบกลับและส่งข่าวเท่านั้น",
+			},
+			{
+				h: "คุกกี้และโฆษณา",
+				p: "เราอาจใช้บริการโฆษณาของบุคคลที่สาม เช่น Google AdSense ซึ่งใช้คุกกี้",
+			},
+			{
+				h: "การวิเคราะห์",
+				p: "เราใช้ Cloudflare Web Analytics ที่คำนึงถึงความเป็นส่วนตัว",
+			},
+			{
+				h: "ลิงก์พันธมิตร",
+				p: "บางบทความอาจมีลิงก์พันธมิตร เราอาจได้รับค่าคอมมิชชันเล็กน้อย",
+			},
+			{
+				h: "ติดต่อ",
+				p: `ติดต่อ ${CONTACT_EMAIL}`,
+			},
+		],
+	},
+};
+
+const c = content[lang];
+---
+
+<BaseLayout lang={lang} title={`${c.title} — ${SITE_NAME}`} description={c.title} showNewsletter={false}>
+	<section class="section">
+		<div class="container narrow">
+			<Breadcrumbs {lang} items={[{ label: c.title }]} />
+			<h1>{c.title}</h1>
+			<p class="updated">{c.updated}</p>
+			{
+				c.sections.map((section) => (
+					<>
+						<h2>{section.h}</h2>
+						<p>{section.p}</p>
+					</>
+				))
+			}
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.narrow {
+		max-width: 760px;
+	}
+	.updated {
+		color: rgb(var(--gray));
+		font-size: 0.9rem;
+	}
+	h2 {
+		margin-top: 2rem;
+	}
+</style>

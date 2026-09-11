@@ -1,0 +1,128 @@
+---
+import { CONTACT_EMAIL, SOCIALS } from "../../consts";
+import { locales, type Lang } from "../../i18n/config";
+import { useTranslations } from "../../i18n/utils";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+---
+
+<BaseLayout lang={lang} title={`${t("contact.title")}`} description={t("contact.description")}>
+	<section class="section">
+		<div class="container narrow">
+			<Breadcrumbs {lang} items={[{ label: t("contact.title") }]} />
+			<h1>{t("contact.title")}</h1>
+			<p class="lead">{t("contact.description")}</p>
+
+			<div class="contact-grid">
+				<form action={`mailto:${CONTACT_EMAIL}`} method="post" enctype="text/plain" class="form">
+					<label>
+						<span>{t("contact.form.name")}</span>
+						<input type="text" name="name" required autocomplete="name" />
+					</label>
+					<label>
+						<span>{t("contact.form.email")}</span>
+						<input type="email" name="email" required autocomplete="email" />
+					</label>
+					<label>
+						<span>{t("contact.form.subject")}</span>
+						<input type="text" name="subject" required />
+					</label>
+					<label>
+						<span>{t("contact.form.message")}</span>
+						<textarea name="message" rows="6" required></textarea>
+					</label>
+					<button type="submit" class="btn btn-primary">{t("contact.form.submit")}</button>
+				</form>
+
+				<aside class="info">
+					<h3>{t("contact.email")}</h3>
+					<p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+					<h3>{t("footer.follow")}</h3>
+					<ul>
+						{SOCIALS.map((s) => (
+							<li>
+								<a href={s.href} target="_blank" rel="noopener">
+									{s.label}
+								</a>
+							</li>
+						))}
+					</ul>
+				</aside>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.narrow {
+		max-width: 960px;
+	}
+	.lead {
+		font-size: 1.15rem;
+		color: rgb(var(--gray));
+		margin-bottom: 2rem;
+	}
+	.contact-grid {
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 2.5rem;
+	}
+	.form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+		font-weight: 700;
+	}
+	input,
+	textarea {
+		font-family: inherit;
+		font-size: 1rem;
+		padding: 0.7em 0.9em;
+		border: 1px solid var(--border);
+		border-radius: 10px;
+		background: #fff;
+	}
+	input:focus,
+	textarea:focus {
+		outline: 2px solid var(--accent-soft);
+		border-color: var(--accent);
+	}
+	.info {
+		background: var(--bg-soft);
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 1.5rem;
+	}
+	.info h3 {
+		font-size: 1rem;
+		margin-top: 1rem;
+	}
+	.info h3:first-child {
+		margin-top: 0;
+	}
+	.info ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+	@media (max-width: 720px) {
+		.contact-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

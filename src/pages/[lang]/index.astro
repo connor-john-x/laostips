@@ -1,0 +1,266 @@
+---
+import { CATEGORIES, CATEGORY_PATHS, SITE_NAME } from "../../consts";
+import { locales, type Lang } from "../../i18n/config";
+import { useTranslations, localizePath } from "../../i18n/utils";
+import { getPostsByLang, toCard } from "../../lib/posts";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import AdSlot from "../../components/AdSlot.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const posts = await getPostsByLang(lang);
+const latest = posts.slice(0, 6).map(toCard);
+const featured = posts[0] ? toCard(posts[0]) : undefined;
+
+const categoryAccent: Record<string, string> = {
+	travel: "#c8102e",
+	work: "#002868",
+	living: "#0e7c66",
+};
+---
+
+<BaseLayout
+	lang={lang}
+	title={`${t("site.name")} — ${t("site.tagline")}`}
+	description={t("site.description")}
+>
+	<section class="hero">
+		<div class="container hero-inner">
+			<div class="hero-copy">
+				<span class="badge badge-blue">{SITE_NAME}</span>
+				<h1>{t("home.hero.title")}</h1>
+				<p class="lead">{t("home.hero.subtitle")}</p>
+				<div class="cta">
+					<a class="btn btn-primary" href={localizePath("/travel/", lang)}>{t("home.hero.cta")}</a>
+					<a class="btn btn-ghost" href={localizePath("/about/", lang)}>
+						{t("home.hero.ctaSecondary")}
+					</a>
+				</div>
+				<ul class="stats">
+					<li><strong>{posts.length}</strong><span>{t("home.stats.articles")}</span></li>
+					<li><strong>{CATEGORIES.length}</strong><span>{t("home.stats.topics")}</span></li>
+					<li><strong>{locales.length}</strong><span>{t("home.stats.languages")}</span></li>
+				</ul>
+			</div>
+
+			{
+				featured && (
+					<aside class="hero-featured">
+						<span class="badge">{t("home.featured")}</span>
+						<a class="featured-link" href={localizePath(`/blog/${featured.slug}/`, lang)}>
+							{featured.heroImage ? (
+								<img src={featured.heroImage} alt="" width={640} height={360} />
+							) : (
+								<div class="featured-placeholder" />
+							)}
+							<h3>{featured.title}</h3>
+							<p>{featured.description}</p>
+						</a>
+					</aside>
+				)
+			}
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container">
+			<div class="section-head">
+				<h2>{t("home.categories.title")}</h2>
+				<p>{t("home.categories.subtitle")}</p>
+			</div>
+			<div class="grid grid-3">
+				{
+					CATEGORIES.map((cat) => (
+						<a
+							class="category-card"
+							href={localizePath(CATEGORY_PATHS[cat], lang)}
+							style={`--cat: ${categoryAccent[cat]}`}
+						>
+							<span class="cat-index" />
+							<h3>{t(`category.${cat}.name`)}</h3>
+							<p>{t(`category.${cat}.desc`)}</p>
+							<span class="cat-cta">{t("home.readGuide")} &rarr;</span>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<AdSlot {lang} variant="banner" />
+
+	<section class="section section-soft">
+		<div class="container">
+			<div class="section-head">
+				<h2>{t("home.latest.title")}</h2>
+				<p>{t("home.latest.subtitle")}</p>
+			</div>
+			{
+				latest.length > 0 ? (
+					<div class="grid grid-3">
+						{latest.map((post) => (
+							<ArticleCard lang={lang} {...post} />
+						))}
+					</div>
+				) : (
+					<div class="empty">
+						<h3>{t("common.noPosts")}</h3>
+						<p>{t("common.noPostsDesc")}</p>
+					</div>
+				)
+			}
+			{
+				latest.length > 0 && (
+					<div class="text-center more">
+						<a class="btn btn-ghost" href={localizePath("/blog/", lang)}>
+							{t("common.viewAll")}
+						</a>
+					</div>
+				)
+			}
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.hero {
+		background:
+			radial-gradient(circle at 12% 20%, rgba(200, 16, 46, 0.1), transparent 45%),
+			radial-gradient(circle at 88% 10%, rgba(0, 40, 104, 0.12), transparent 45%),
+			var(--bg-soft);
+		border-bottom: 1px solid var(--border);
+	}
+	.hero-inner {
+		display: grid;
+		grid-template-columns: 1.15fr 0.85fr;
+		gap: 3rem;
+		align-items: center;
+		padding: 4rem 0;
+	}
+	.hero-copy h1 {
+		font-size: 3rem;
+		margin: 1rem 0 1rem;
+	}
+	.lead {
+		font-size: 1.15rem;
+		color: rgb(var(--gray));
+		max-width: 52ch;
+	}
+	.cta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin: 1.5rem 0 2rem;
+	}
+	.stats {
+		display: flex;
+		gap: 2.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.stats li {
+		display: flex;
+		flex-direction: column;
+	}
+	.stats strong {
+		font-size: 1.8rem;
+		color: rgb(var(--black));
+		line-height: 1;
+	}
+	.stats span {
+		font-size: 0.85rem;
+		color: rgb(var(--gray));
+	}
+	.hero-featured {
+		background: #fff;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		padding: 1.25rem;
+		box-shadow: var(--box-shadow);
+	}
+	.featured-link {
+		display: block;
+		color: inherit;
+	}
+	.featured-link:hover {
+		text-decoration: none;
+	}
+	.featured-link img,
+	.featured-placeholder {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border-radius: 10px;
+		margin: 0.75rem 0;
+	}
+	.featured-placeholder {
+		background:
+			radial-gradient(circle at 30% 30%, rgba(200, 16, 46, 0.25), transparent 55%),
+			radial-gradient(circle at 75% 70%, rgba(0, 40, 104, 0.25), transparent 55%),
+			var(--bg-soft);
+	}
+	.featured-link h3 {
+		font-size: 1.15rem;
+		margin-bottom: 0.35rem;
+	}
+	.featured-link p {
+		font-size: 0.9rem;
+		color: rgb(var(--gray));
+		margin: 0;
+	}
+	.category-card {
+		display: block;
+		position: relative;
+		padding: 1.75rem 1.5rem;
+		background: #fff;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		color: inherit;
+		transition: 0.18s ease;
+	}
+	.category-card:hover {
+		text-decoration: none;
+		transform: translateY(-3px);
+		box-shadow: var(--box-shadow);
+		border-color: transparent;
+	}
+	.cat-index {
+		display: block;
+		width: 40px;
+		height: 6px;
+		border-radius: 999px;
+		background: var(--cat);
+		margin-bottom: 1rem;
+	}
+	.category-card h3 {
+		margin-bottom: 0.4rem;
+	}
+	.category-card p {
+		color: rgb(var(--gray));
+		font-size: 0.95rem;
+		margin-bottom: 1rem;
+	}
+	.cat-cta {
+		font-weight: 700;
+		color: var(--cat);
+		font-size: 0.9rem;
+	}
+	.more {
+		margin-top: 2.5rem;
+	}
+	@media (max-width: 900px) {
+		.hero-inner {
+			grid-template-columns: 1fr;
+			padding: 2.5rem 0;
+		}
+		.hero-copy h1 {
+			font-size: 2.25rem;
+		}
+	}
+</style>

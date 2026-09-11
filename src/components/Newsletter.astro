@@ -1,0 +1,83 @@
+---
+import { CONTACT_EMAIL, NEWSLETTER_ACTION } from "../consts";
+import type { Lang } from "../i18n/config";
+import { useTranslations } from "../i18n/utils";
+
+interface Props {
+	lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const action = NEWSLETTER_ACTION || `mailto:${CONTACT_EMAIL}`;
+---
+
+<section class="newsletter">
+	<div class="inner">
+		<div class="copy">
+			<h2>{t("newsletter.title")}</h2>
+			<p>{t("newsletter.description")}</p>
+		</div>
+		<form class="signup" action={action} method="post">
+			<label class="sr-only" for="newsletter-email">{t("newsletter.placeholder")}</label>
+			<input
+				id="newsletter-email"
+				type="email"
+				name="email"
+				required
+				placeholder={t("newsletter.placeholder")}
+			/>
+			<button type="submit" class="btn btn-light">{t("newsletter.button")}</button>
+		</form>
+		<p class="privacy">{t("newsletter.privacy")}</p>
+	</div>
+</section>
+
+<style>
+	.newsletter {
+		background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 60%, #5c0714 100%);
+		color: #fff;
+	}
+	.inner {
+		width: var(--container);
+		max-width: calc(100% - 2rem);
+		margin-inline: auto;
+		padding: 3rem 0;
+		text-align: center;
+	}
+	.copy h2 {
+		color: #fff;
+		margin-bottom: 0.35rem;
+	}
+	.copy p {
+		color: rgba(255, 255, 255, 0.85);
+		max-width: 52ch;
+		margin-inline: auto;
+	}
+	.signup {
+		display: flex;
+		gap: 0.6rem;
+		max-width: 480px;
+		margin: 1.5rem auto 0.75rem;
+	}
+	.signup input {
+		flex: 1;
+		padding: 0.8em 1.1em;
+		border-radius: 999px;
+		border: none;
+		font-size: 1rem;
+		font-family: inherit;
+	}
+	.signup .btn-light {
+		color: var(--accent);
+	}
+	.privacy {
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.7);
+		margin: 0;
+	}
+	@media (max-width: 520px) {
+		.signup {
+			flex-direction: column;
+		}
+	}
+</style>

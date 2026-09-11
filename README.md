@@ -1,64 +1,82 @@
-# Astro Starter Kit: Blog
+# LaosTips 老挝指南
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/astro-blog-starter-template)
+面向前往老挝**旅游、留学、工作、生活**人群的多语言实用指南网站。
+支持 **中文 / 英文 / 老挝语 / 泰语** 四种语言，基于 Astro 5 + Cloudflare Workers 构建。
 
-![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
+## 功能
 
-<!-- dash-content-start -->
+- 多语言路由与 UI 翻译（`/zh/`、`/en/`、`/lo/`、`/th/`）
+- 三大内容板块：旅游攻略、工作与经商、生活指南
+- Markdown / MDX 内容集合，按语言分目录
+- SEO：canonical、hreflang、Open Graph、JSON-LD、Sitemap、RSS
+- 内置广告位、邮件订阅、广告招商页、隐私政策（变现就绪）
+- 响应式布局，Lighthouse 友好
 
-Create a blog with Astro and deploy it on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
-
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-- ✅ Built-in Observability logging
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+## 快速开始
 
 ```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/astro-blog-starter-template
+npm install
+npm run dev      # 本地开发 http://localhost:4321
+npm run build    # 构建到 ./dist
+npm run preview  # 本地预览构建结果
+npm run check    # 构建 + 类型检查
 ```
 
-A live public deployment of this template is available at [https://astro-blog-starter-template.templates.workers.dev](https://astro-blog-starter-template.templates.workers.dev)
+## 目录结构
 
-## 🚀 Project Structure
+```
+src/
+  i18n/            # 多语言配置、UI 翻译、工具函数
+  consts.ts        # 站点、广告、分析等全局配置
+  content/blog/    # 文章：<lang>/<slug>.md
+  components/      # Header/Footer/AdSlot/Newsletter 等
+  layouts/         # BaseLayout、ArticleLayout
+  lib/posts.ts     # 内容查询与阅读时间
+  pages/[lang]/    # 首页、板块、博客、关于、联系、广告、隐私、RSS
+docs/monetization.md  # 变现方案
+```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 添加一篇文章
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+在 `src/content/blog/<语言>/` 下新建 Markdown，例如
+`src/content/blog/zh/my-post.md`：
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+```md
+---
+title: "标题"
+description: "摘要，用于 SEO 与列表"
+pubDate: 2026-03-01
+category: travel   # travel | work | living
+tags: ["标签1", "标签2"]
+author: "作者"
+featured: false
+heroImage: "/blog-placeholder-1.jpg"
+---
 
-Any static assets, like images, can be placed in the `public/` directory.
+正文……
+```
 
-## 🧞 Commands
+## 配置站点
 
-All commands are run from the root of the project, from a terminal:
+编辑 `src/consts.ts`：站点名、域名、邮箱、社交链接、广告与分析开关。
+修改 `astro.config.mjs` 中的 `site` 为你的真实域名。
 
-| Command                           | Action                                           |
-| :-------------------------------- | :----------------------------------------------- |
-| `npm install`                     | Installs dependencies                            |
-| `npm run dev`                     | Starts local dev server at `localhost:4321`      |
-| `npm run build`                   | Build your production site to `./dist/`          |
-| `npm run preview`                 | Preview your build locally, before deploying     |
-| `npm run astro ...`               | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help`         | Get help using the Astro CLI                     |
-| `npm run build && npm run deploy` | Deploy your production site to Cloudflare        |
-| `npm wrangler tail`               | View real-time logs for all Workers              |
+启用 Google AdSense：
 
-## 👀 Want to learn more?
+1. 申请通过后，设置环境变量 `PUBLIC_ADSENSE_CLIENT=ca-pub-xxxx`。
+2. 将 `src/consts.ts` 中 `ADSENSE_ENABLED` 改为 `true`。
+3. 在页面里给 `<AdSlot slot="广告单元ID" />` 填入广告单元。
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 部署（Cloudflare）
 
-## Credit
+```bash
+npm run deploy   # wrangler deploy
+```
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+`wrangler.json` 已配置 Worker 名称 `laostips`。首次部署前用
+`npx wrangler login` 登录，并在 Cloudflare 控制台绑定自定义域名。
+
+## 变现
+
+见 [`docs/monetization.md`](docs/monetization.md)：广告联盟、联盟营销、
+赞助软文、邮件赞助、增值服务与流量策略。

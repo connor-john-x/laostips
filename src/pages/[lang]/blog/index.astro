@@ -1,0 +1,153 @@
+---
+import { CATEGORIES } from "../../../consts";
+import { locales, type Lang } from "../../../i18n/config";
+import { useTranslations, localizePath } from "../../../i18n/utils";
+import { getPostsByLang, toCard } from "../../../lib/posts";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ArticleCard from "../../../components/ArticleCard.astro";
+import AdSlot from "../../../components/AdSlot.astro";
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const posts = (await getPostsByLang(lang)).map(toCard);
+const [featured, ...rest] = posts;
+---
+
+<BaseLayout lang={lang} title={`${t("blog.title")} — ${t("site.name")}`} description={t("blog.description")}>
+	<section class="section">
+		<div class="container">
+			<Breadcrumbs {lang} items={[{ label: t("blog.title") }]} />
+			<div class="section-head">
+				<h1>{t("blog.title")}</h1>
+				<p>{t("blog.description")}</p>
+			</div>
+
+			<nav class="filters" aria-label="Categories">
+				<span class="chip active">{t("blog.all")}</span>
+				{
+					CATEGORIES.map((cat) => (
+						<a class="chip" href={localizePath(`/${cat}/`, lang)}>
+							{t(`category.${cat}.name`)}
+						</a>
+					))
+				}
+			</nav>
+
+			{
+				posts.length === 0 && (
+					<div class="empty">
+						<h3>{t("common.noPosts")}</h3>
+						<p>{t("common.noPostsDesc")}</p>
+					</div>
+				)
+			}
+
+			{
+				featured && (
+					<a class="featured" href={localizePath(`/blog/${featured.slug}/`, lang)}>
+						{featured.heroImage ? (
+							<img src={featured.heroImage} alt="" width={1120} height={560} />
+						) : (
+							<div class="featured-placeholder" />
+						)}
+						<div class="featured-body">
+							<span class="badge">{t("home.featured")}</span>
+							<h2>{featured.title}</h2>
+							<p>{featured.description}</p>
+						</div>
+					</a>
+				)
+			}
+
+			{rest.length > 0 && <AdSlot {lang} variant="banner" />}
+
+			{
+				rest.length > 0 && (
+					<div class="grid grid-3">
+						{rest.map((post) => (
+							<ArticleCard lang={lang} {...post} />
+						))}
+					</div>
+				)
+			}
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 2rem;
+	}
+	.chip {
+		padding: 0.4em 1em;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		color: rgb(var(--gray-dark));
+		font-size: 0.9rem;
+	}
+	.chip:hover {
+		text-decoration: none;
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.chip.active {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
+	}
+	.featured {
+		display: grid;
+		grid-template-columns: 1.2fr 1fr;
+		gap: 0;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		overflow: hidden;
+		margin-bottom: 2rem;
+		color: inherit;
+	}
+	.featured:hover {
+		text-decoration: none;
+		box-shadow: var(--box-shadow);
+	}
+	.featured img,
+	.featured-placeholder {
+		width: 100%;
+		height: 100%;
+		min-height: 240px;
+		object-fit: cover;
+		border-radius: 0;
+	}
+	.featured-placeholder {
+		background:
+			radial-gradient(circle at 30% 30%, rgba(200, 16, 46, 0.22), transparent 55%),
+			radial-gradient(circle at 75% 70%, rgba(0, 40, 104, 0.22), transparent 55%),
+			var(--bg-soft);
+	}
+	.featured-body {
+		padding: 2rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+	.featured-body h2 {
+		margin: 0;
+	}
+	.featured-body p {
+		color: rgb(var(--gray));
+		margin: 0;
+	}
+	@media (max-width: 720px) {
+		.featured {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

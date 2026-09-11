@@ -1,0 +1,135 @@
+---
+import { CATEGORIES, SITE_NAME, SOCIALS } from "../../consts";
+import { languages, locales, type Lang } from "../../i18n/config";
+import { useTranslations, localizePath } from "../../i18n/utils";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import AdSlot from "../../components/AdSlot.astro";
+
+export function getStaticPaths() {
+	return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const values = [t("about.value1"), t("about.value2"), t("about.value3")];
+---
+
+<BaseLayout lang={lang} title={`${t("about.title")} — ${SITE_NAME}`} description={t("about.description")}>
+	<section class="section">
+		<div class="container narrow">
+			<Breadcrumbs {lang} items={[{ label: t("about.title") }]} />
+			<h1>{t("about.title")}</h1>
+			<p class="lead">{t("about.intro")}</p>
+
+			<h2>{t("about.missionTitle")}</h2>
+			<p>{t("about.mission")}</p>
+
+			<h2>{t("about.valueTitle")}</h2>
+			<ul class="values">
+				{values.map((value) => <li>{value}</li>)}
+			</ul>
+
+			<h2>{t("home.stats.languages")}</h2>
+			<div class="langs">
+				{
+					locales.map((loc) => (
+						<a href={localizePath("/", loc)} class:list={{ active: loc === lang }}>
+							{languages[loc].native}
+						</a>
+					))
+				}
+			</div>
+
+			<h2>{t("home.categories.title")}</h2>
+			<div class="grid grid-3">
+				{
+					CATEGORIES.map((cat) => (
+						<a class="cat" href={localizePath(`/${cat}/`, lang)}>
+							<strong>{t(`category.${cat}.name`)}</strong>
+							<span>{t(`category.${cat}.desc`)}</span>
+						</a>
+					))
+				}
+			</div>
+
+			<div class="cta">
+				<a class="btn btn-primary" href={localizePath("/contact/", lang)}>{t("common.getInTouch")}</a>
+				<a class="btn btn-ghost" href={localizePath("/advertise/", lang)}>{t("advertise.cta")}</a>
+			</div>
+
+			<div class="socials">
+				{SOCIALS.map((s) => <a href={s.href} target="_blank" rel="noopener">{s.label}</a>)}
+			</div>
+		</div>
+	</section>
+	<div class="container">
+		<AdSlot {lang} variant="banner" />
+	</div>
+</BaseLayout>
+
+<style>
+	.narrow {
+		max-width: 820px;
+	}
+	.lead {
+		font-size: 1.15rem;
+		color: rgb(var(--gray));
+	}
+	h2 {
+		margin-top: 2.5rem;
+	}
+	.values {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		padding-left: 1.2rem;
+	}
+	.langs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+	.langs a {
+		padding: 0.4em 1em;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		color: rgb(var(--gray-dark));
+	}
+	.langs a.active {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #fff;
+	}
+	.langs a:hover {
+		text-decoration: none;
+	}
+	.cat {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding: 1.25rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		color: inherit;
+	}
+	.cat:hover {
+		text-decoration: none;
+		border-color: var(--accent);
+	}
+	.cat span {
+		font-size: 0.9rem;
+		color: rgb(var(--gray));
+	}
+	.cta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 2.5rem;
+	}
+	.socials {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-top: 1.5rem;
+	}
+</style>

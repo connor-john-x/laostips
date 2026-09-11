@@ -1,0 +1,92 @@
+---
+import { ADSENSE_CLIENT, ADSENSE_ENABLED } from "../consts";
+import type { Lang } from "../i18n/config";
+import { useTranslations, localizePath } from "../i18n/utils";
+
+interface Props {
+	lang: Lang;
+	/** Visual format of the slot. */
+	variant?: "banner" | "in-article" | "sidebar" | "footer";
+	/** AdSense ad unit id (data-ad-slot). Required for real ads. */
+	slot?: string;
+	class?: string;
+}
+const { lang, variant = "banner", slot = "", class: className } = Astro.props;
+const t = useTranslations(lang);
+const live = ADSENSE_ENABLED && !!ADSENSE_CLIENT && !!slot;
+---
+
+{
+	live ? (
+		<aside class:list={["ad-slot", variant, className]} aria-label={t("ads.label")}>
+			<ins
+				class="adsbygoogle"
+				style="display:block"
+				data-ad-client={ADSENSE_CLIENT}
+				data-ad-slot={slot}
+				data-ad-format={variant === "sidebar" ? "auto" : "auto"}
+				data-full-width-responsive="true"
+			/>
+			<script is:inline>
+				(adsbygoogle = window.adsbygoogle || []).push({});
+			</script>
+		</aside>
+	) : (
+		<aside class:list={["ad-slot", variant, "placeholder", className]} aria-label={t("ads.label")}>
+			<span class="tag">{t("ads.label")}</span>
+			<span class="hint">{t("ads.placeholder")}</span>
+			<a href={localizePath("/advertise/", lang)}>{t("advertise.cta")} &rarr;</a>
+		</aside>
+	)
+}
+
+<style>
+	.ad-slot {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.35rem;
+		text-align: center;
+		background: var(--bg-soft);
+		border: 1px dashed var(--border);
+		border-radius: var(--radius);
+		color: rgb(var(--gray));
+		font-size: 0.85rem;
+		overflow: hidden;
+	}
+	.banner {
+		min-height: 96px;
+		padding: 1rem;
+		margin: 1.5rem 0;
+	}
+	.in-article {
+		min-height: 140px;
+		padding: 1rem;
+		margin: 2rem 0;
+	}
+	.sidebar {
+		min-height: 260px;
+		padding: 1rem;
+	}
+	.footer {
+		min-height: 90px;
+		padding: 1rem;
+		margin: 2rem auto;
+	}
+	.tag {
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		font-size: 0.7rem;
+		color: var(--accent);
+	}
+	.hint {
+		font-size: 0.95rem;
+		color: rgb(var(--gray));
+	}
+	.placeholder a {
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+</style>
