@@ -61,7 +61,7 @@ const t = useTranslations(lang);
 
 <style>
 	.narrow {
-		max-width: 960px;
+		max-width: min(960px, calc(100% - 2rem));
 	}
 	.lead {
 		font-size: 1.15rem;
